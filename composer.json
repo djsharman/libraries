@@ -1,0 +1,7 @@
+{
+    "name": "djsharman/libraries",
+    "description": "A set of libraries I use often in my code.",
+    "require": {
+        "php": ">=5.3.0"
+    }
+}

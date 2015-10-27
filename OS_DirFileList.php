@@ -1,4 +1,6 @@
 <?php 
+namespace djsharman\libraries;
+
 /**
 * get recursive directory listing
 */

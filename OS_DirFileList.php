@@ -1,9 +1,11 @@
 <?php 
-namespace djsharman\libraries;
+
 
 /**
 * get recursive directory listing
 */
+
+namespace djsharman\libraries;
 class OS_DirFileList {
     private $recursive = true;
     private $directory;
@@ -12,17 +14,16 @@ class OS_DirFileList {
     private $file_count;
     private $include_list;
 
-    public function OS_DirFileList($directory, $ignore_list, $include_list) {
+    public function __construct($directory, $ignore_list, $include_list) {
         $this->directory = $directory;
-        $this->ignore_list = $ignore_list;
         $this->file_list = array();
-        $this->ignore_list = array("..", ".")+$ignore_list;
+        $this->ignore_list = array("..", ".") + $ignore_list;
         $this->file_count = 0;
         $this->include_list = $include_list;
     }
 
     public static function &getFileList($directory, $ignore_list=array(), $recursive=true, $include_list=null ) {
-        $RDFL = new OS_DirFileList($directory, $ignore_list, $include_list);
+        $RDFL = new self($directory, $ignore_list, $include_list);
         $RDFL->setRecursive($recursive);
         $RDFL->processDir($directory);
         return $RDFL->file_list;
@@ -35,32 +36,36 @@ class OS_DirFileList {
         $include = $this->include_list;
 
         $dh = @opendir( $path );
-
-        // Loop through the directory
-        while( false !== ( $file = readdir( $dh ) ) ){
-            // Check that this file is not to be ignored
-            if( !in_array( $file, $ignore ) ){
-                // is it a directory, if so we need to keep reading down
-                if( is_dir( "$path/$file" ) ){
-                    if($this->recursive == true) {
-                        // recursively process this dir
-                        $this->processDir( "$path/$file" );
-                    }
-                } else {
-                	// process file to see if its extension is in the include list.
-                	if(!empty($include)) {
-	                	$path_parts = pathinfo($file);
-	                	$file_ext = $path_parts['extension'];
-	                	if(in_array($file_ext, $include)) {
-	                		$this->addFileToList("$path/$file");
+		if($dh !== false) {
+	        // Loop through the directory
+	        while( false !== ( $file = readdir( $dh ) ) ){
+	            // Check that this file is not to be ignored
+	            if( !in_array( $file, $ignore ) ){
+	                // is it a directory, if so we need to keep reading down
+	                if( is_dir( "$path/$file" ) ){
+	                    if($this->recursive == true) {
+	                        // recursively process this dir
+	                        $this->processDir( "$path/$file" );
+	                    }
+	                } else {
+	                	// process file to see if its extension is in the include list.
+	                	if(!empty($include)) {
+		                	$path_parts = pathinfo($file);
+		                	$file_ext = $path_parts['extension'];
+		                	if(in_array($file_ext, $include)) {
+		                		$this->addFileToList("$path/$file");
+		                	}
+	                	} else {
+	                    	$this->addFileToList("$path/$file");
 	                	}
-                	} else {
-                    	$this->addFileToList("$path/$file");
-                	}
-                }
-            }
-        }
-        closedir( $dh );
+	                }
+	            }
+	        }
+	        closedir( $dh );
+		} else {
+			// directory is incorrect
+			$thisL->file_list = false;	
+		}
     }
 
     private function addFileToList($file) {
